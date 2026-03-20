@@ -1,8 +1,7 @@
 import css from './SearchBox.module.css';
-import { type DebouncedState } from 'use-debounce';
 
 interface SearchBoxProps {
-  onNoteSearch: DebouncedState<React.Dispatch<React.SetStateAction<string>>>;
+  onNoteSearch: (value: string) => void;
   value: string;
 }
 

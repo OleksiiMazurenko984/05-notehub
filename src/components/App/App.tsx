@@ -1,12 +1,7 @@
 import css from './App.module.css';
 import NoteList from '../NoteList/NoteList';
-import {
-  useQuery,
-  keepPreviousData,
-  useMutation,
-  useQueryClient,
-} from '@tanstack/react-query';
-import { createNote, fetchNotes } from '../../services/noteService';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
+import { fetchNotes } from '../../services/noteService';
 import { useState } from 'react';
 import Pagination from '../Pagination/Pagination';
 import Modal from '../Modal/Modal';
@@ -22,24 +17,18 @@ export default function App() {
   const [isModalShown, setIsModalShown] = useState<boolean>(false);
   const [query, setQuery] = useState<string>('');
 
-  const queryClient = useQueryClient();
-
   const { data, isLoading, isError } = useQuery({
     queryKey: ['notes', page, query],
     queryFn: () => fetchNotes(page, perPage, query),
     placeholderData: keepPreviousData,
   });
 
-  const { mutate: addNote } = useMutation({
-    mutationFn: createNote,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notes'] });
-    },
-  });
-
   const onClose = () => setIsModalShown(false);
 
-  const searchNote = useDebouncedCallback(setQuery, 500);
+  const searchNote = useDebouncedCallback((value: string) => {
+    setQuery(value);
+    setPage(1);
+  }, 500);
 
   return (
     <div className={css.app}>
@@ -62,8 +51,8 @@ export default function App() {
 
       {data && <NoteList notes={data.notes} />}
       {isModalShown && (
-        <Modal>
-          <NoteForm onClose={onClose} addNote={addNote} />
+        <Modal onClose={onClose}>
+          <NoteForm onClose={onClose} />
         </Modal>
       )}
     </div>
